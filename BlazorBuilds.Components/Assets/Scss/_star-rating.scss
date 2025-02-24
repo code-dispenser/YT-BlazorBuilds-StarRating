@@ -1,0 +1,73 @@
+﻿@use "svg-icons";
+
+.star-rating {
+    --_min-target-size: 24px;
+    --_star-solid-clr: #996C00; 
+    --_star-outline-clr: #959595;
+
+    &--large-target {
+        --_min-target-size: 44px;
+    }
+
+    &[aria-disabled=true] &__icon {
+        opacity: 0.50;
+    }
+
+    &[aria-disabled=true] &__button {
+        cursor: not-allowed;
+    }
+
+    &[aria-disabled=false] &__icon:hover {
+        transform: scale(1.2);
+    }
+
+    &__controls {
+        display: inline-flex;
+        border-radius: var(--control-border-radius);
+
+        &:has(:focus-within .star-rating__button:focus-visible) {
+            outline: 2px solid var(--_star-outline-clr);
+        }
+    }
+
+    &__icon {
+        min-height: var(--_min-target-size);
+        min-width: var(--_min-target-size);
+        color: var(--_star-solid-clr);
+        padding: 0;
+        margin: 0;
+        transition: transform 200ms ease-in-out, color 200ms ease-in-out;
+        forced-color-adjust: none; //keeps our colours and stops the svg icon becoming a black block in high contrast mode
+
+        &--solid {
+            @extend %star-solid-icon;
+        }
+
+        &--outline {
+            @extend %star-outline-icon;
+            color: var(--_star-outline-clr);
+        }
+    }
+
+    &__button {
+        appearance: none;
+        height: 100%;
+        width: 100%;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__label {
+        display: block;
+        font-size: var(--fs-label);
+        font-weight: bold;
+        padding-bottom:0.375rem;
+
+        &--hidden {
+            display: none
+        }
+    }
+}

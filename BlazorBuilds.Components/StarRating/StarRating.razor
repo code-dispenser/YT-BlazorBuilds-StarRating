@@ -1,0 +1,109 @@
+﻿
+<div class="@GetStarRatingClasses(StarSize)" role="@(_readOnly ? "img" : "radiogroup")" aria-labelledby="@(_readOnly ? $"{_ariaLabelID} {_ariaOutOfID}" : _ariaLabelID)" 
+     aria-disabled="@(_readOnly ? null: Disabled.ToString().ToLower())" data-static="@GlobalValues.GetStyleAsValue(StyleAs)">
+
+    <span id="@_ariaLabelID" class="@GetLabelClasses(ShowLabel)">@_ratingLabel</span>
+    <span id="@_ariaOutOfID" style="display:none;">@($"{_selectedValue} {_ariaOutOfText} {_numberOfStars}")</span>
+
+    @for (int index = 1; index <= _numberOfStars; index++)
+    {
+        var ratingValue = index;
+        var isSelected  = ratingValue == _selectedValue;
+        var tabIndex   = _rovingIndex == ratingValue ? 0 : -1;//See comment in OnParametersSet method for why this was added as browsers set focus to the selected star without a tab index set.
+
+        @if(_readOnly == false)
+        {
+            <div class="star-rating__controls">
+                <div class="@GlobalValues.StarRating_Icon_Class @GetStarIconModifierClass(ratingValue,_selectedValue, _hoveredItem)" 
+                    @onmouseover="(eventArgs) => OnMouseOverOrOut(eventArgs, ratingValue, Disabled)" @onmouseout="(eventArgs) => OnMouseOverOrOut(eventArgs, 0, Disabled)">
+
+                    <input id="@($"{_starRatingID}-{ratingValue}")" class="@GlobalValues.StarRating_Button_Class" type="radio" name="@_starRatingID" value="@ratingValue" checked="@isSelected" 
+                        @onchange="OnSelectionChanged" aria-label="@($"{ratingValue} {_ariaRatingName}")" @onclick:preventDefault="@Disabled" tabindex="@tabIndex" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <span class="@GlobalValues.StarRating_Icon_Class @GetStarIconModifierClass(ratingValue,_selectedValue, 0)" aria-hidden="true"></span>
+        }
+    }
+
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string RatingLabel { get; set; } = default!;
+
+    [Parameter] public bool        ShowLabel      { get; set; } = true;
+    [Parameter] public RatingScale RatingScale    { get; set; } = RatingScale.FiveStar;
+    [Parameter] public StarSize    StarSize       { get; set; } = StarSize.Normal;
+    [Parameter] public string      AriaRatingName { get; set; } = default!;
+    [Parameter] public string      AriaOutOfText  { get; set; } = default!;
+    [Parameter] public int         RatingValue    { get; set; } = 0;
+    [Parameter] public bool        Disabled       { get; set; } = false;
+    [Parameter] public bool        ReadOnly       { get; set; } = false;
+    [Parameter] public StyleAs     StyleAs        { get; set; } = StyleAs.Dynamic;
+
+    [Parameter] public EventCallback<int> RatingValueChanged { get; set; }
+
+    private string _ariaOutOfID    = Guid.NewGuid().ToString();
+    private string _ariaLabelID    = Guid.NewGuid().ToString();
+    private string _starRatingID   = Guid.NewGuid().ToString();
+    private string _ratingLabel    = String.Empty;
+    private string _ariaRatingName = GlobalValues.Aria_Rating_Name;
+    private string _ariaOutOfText  = GlobalValues.Aria_Out_Of_Text;
+    private bool    _readOnly      = false;
+    private int    _numberOfStars  = (int)RatingScale.FiveStar;
+    private int    _selectedValue  = 0;
+    private int    _hoveredItem    = 0;
+    private int    _rovingIndex    = 1;
+
+    protected override void OnParametersSet()
+    {    
+        _selectedValue = (RatingValue > 0 && RatingValue <= (int)RatingScale) ? RatingValue : 0;
+        /*
+            * With the default browser behavior you can tab to the selected star without any tab index set.
+            * However, for empty selections, the first star is selected, with some browsers selecting the last star with shift + tab (what I found).
+            * I do not think it was a definitive requirement to always have the first star selected when none are selected, but as a roving index was simple to add I did so.
+        */
+        _rovingIndex  = _selectedValue == 0 ? 1 : _selectedValue; 
+    }
+
+    protected override void OnInitialized()
+    {
+        if (String.IsNullOrWhiteSpace(RatingLabel)) throw new ArgumentNullException(nameof(RatingLabel), GlobalValues.Rating_Label_Exception_Message);
+
+        _ariaRatingName = String.IsNullOrWhiteSpace(AriaRatingName) ? GlobalValues.Aria_Rating_Name : AriaRatingName;
+        _ariaOutOfText  = String.IsNullOrWhiteSpace(AriaOutOfText)  ? GlobalValues.Aria_Out_Of_Text : AriaOutOfText;
+        _ratingLabel    = RatingLabel;
+        _readOnly       = ReadOnly;
+        _numberOfStars  = (int)RatingScale;
+    }
+
+    private async Task OnSelectionChanged(ChangeEventArgs args)
+    {
+        _selectedValue = (int.TryParse(args.Value!.ToString(), out int value)) ? value : 0;
+        _rovingIndex   = _selectedValue == 0 ? 1 : _selectedValue;
+
+        if (true == RatingValueChanged.HasDelegate) await RatingValueChanged.InvokeAsync(_selectedValue);
+    }
+
+    private void OnMouseOverOrOut(MouseEventArgs args, int hoveredItem, bool disabled)
+
+        =>  _hoveredItem =  disabled ? 0 : hoveredItem;
+
+    private string GetStarIconModifierClass(int buttonIndex, int selectedValue, int hoveredItem)
+    {
+        if (hoveredItem > 0) return hoveredItem >= buttonIndex ? GlobalValues.StarRating_Icon_Solid_Modifier_Class : GlobalValues.StarRating_Icon_Outline_Modifier_Class;
+
+        return buttonIndex <= _selectedValue ? GlobalValues.StarRating_Icon_Solid_Modifier_Class : GlobalValues.StarRating_Icon_Outline_Modifier_Class;
+    }
+
+    private string GetStarRatingClasses(StarSize starSize)
+
+        => starSize == StarSize.Normal ? GlobalValues.StarRating_Class : $"{GlobalValues.StarRating_Class} {GlobalValues.StarRating_Large_Target_Modifier_Class}";
+
+    private string GetLabelClasses(bool showLabel) 
+
+        => showLabel ? GlobalValues.StarRating_Label_Class : $"{GlobalValues.StarRating_Label_Hidden_Modifier_Class}";
+
+}

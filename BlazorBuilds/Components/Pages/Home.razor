@@ -1,0 +1,59 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, Accessible Star Rating Component!</h1>
+
+<p class="mt-4">Star rating with visible label, 3 star scale, with no current value (two way binding without event)</p>
+<StarRating @bind-RatingValue="@_ratingComponentOneValue" RatingLabel="Michelin star rating:" AriaRatingName="Star" RatingScale="RatingScale.ThreeStar"
+        ShowLabel="true" Disabled="false" StarSize="StarSize.Normal" ReadOnly="false" />
+
+<p class="mt-2">
+    Michelin star bound value of: @_ratingComponentOneValue
+</p>
+
+<p class="mt-4">Star rating with visible label, 5 star scale, bound current value of 4 (two way binding using event)</p>
+<StarRating RatingValue="@_ratingComponentTwoValue" RatingLabel="Product review:" AriaRatingName="Star" RatingScale="RatingScale.FiveStar"
+        ShowLabel="true" Disabled="false" StarSize="StarSize.Normal" RatingValueChanged="OnRatingValueChanged" ReadOnly="false" />
+
+<p class="mt-2">
+    Product review star bound value of: @_ratingComponentTwoValue
+</p>
+
+<p class="mt-4">Star rating with visible label, 5 star scale, bound current value of 3 (two way binding without event), using large (enhanced target size) stars</p>
+
+<StarRating @bind-RatingValue="@_ratingComponentThreeValue" RatingLabel="Service rating:" AriaRatingName="Star" RatingScale="RatingScale.FiveStar"
+        ShowLabel="true" Disabled="false" StarSize="StarSize.Enhanced" ReadOnly="false" />
+
+<p class="mt-2">
+    Service rating star bound value of: @_ratingComponentThreeValue
+</p>
+
+<p class="mt-4">Star rating without visible label, 10 star scale disabled with current bound value of 5 (two way binding without event), using large (enhanced target size) stars</p>
+<StarRating @bind-RatingValue="@_ratingComponentFourValue" RatingLabel="Movie rating:" AriaRatingName="Star" RatingScale="RatingScale.TenStar"
+         ShowLabel="false" Disabled="true" StarSize="StarSize.Enhanced" ReadOnly="false" />
+
+<p class="mt-2">
+    Movie rating star bound value of: @_ratingComponentFourValue
+</p>
+
+<p class="mt-4">Star rating without visible label, 10 star scale with a value of 8 (one way binding), using large (enhanced target size) stars, displayed as readonly</p>
+<StarRating RatingValue="8" RatingLabel="Movie rating:" AriaRatingName="Star" RatingScale="RatingScale.TenStar"
+            ShowLabel="false" Disabled="false" StarSize="StarSize.Enhanced" ReadOnly="true" />
+
+<p class="mt-2">
+    Movie rating star value of: 8
+</p>
+@code{
+
+    private int _ratingComponentOneValue   = 0;
+    private int _ratingComponentTwoValue   = 4;
+    private int _ratingComponentThreeValue = 3;
+    private int _ratingComponentFourValue  = 5;
+
+
+    private void OnRatingValueChanged(int value)
+    
+        => _ratingComponentTwoValue = value;
+ 
+}
