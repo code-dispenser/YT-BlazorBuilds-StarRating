@@ -4,7 +4,7 @@
 
 This repository contains the solution from my YouTube video showing how to build an accessible star rating component.
 
-YouTube video: TBA
+YouTube video: https://youtu.be/VTuB1o4RPcM
 
 Coffees welcomed : https://ko-fi.com/codedispenser
 
